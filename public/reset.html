@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Password Reset</title>
+</head>
+<body>
+  <h1>Password Reset</h1>
+  <div id="request">
+    <p>Request a password reset link</p>
+    <input type="email" id="reqEmail" placeholder="Email"><br>
+    <button id="reqBtn">Request Reset</button>
+  </div>
+  <div id="reset" style="display:none;">
+    <p>Enter your new password</p>
+    <input type="password" id="newPassword" placeholder="New Password"><br>
+    <button id="resetBtn">Set Password</button>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    if(token){
+      document.getElementById('request').style.display='none';
+      document.getElementById('reset').style.display='block';
+      resetBtn.onclick = async () => {
+        const res = await fetch('/api/password-reset', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({token, password:newPassword.value})
+        });
+        const data = await res.json();
+        if(res.ok){
+          alert('Password updated');
+          window.location = '/';
+        } else { alert(data.error); }
+      }
+    } else {
+      reqBtn.onclick = async () => {
+        await fetch('/api/password-reset-request', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({email:reqEmail.value})
+        });
+        alert('If the email exists, a reset link was sent. Check console in this demo.');
+      }
+    }
+  </script>
+</body>
+</html>
