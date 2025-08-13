@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+</head>
+<body>
+  <h1>Dashboard</h1>
+  <div id="info"></div>
+  <div id="links" style="display:none;">
+    <p><button id="launchCml">Launch CML</button> <button id="rebootCml">Reboot CML</button></p>
+    <p>VMs: <span id="vmLinks"></span></p>
+    <p><button id="rebootVm1">Reboot VM1</button> <button id="rebootVm2">Reboot VM2</button></p>
+    <h3>Submit Ticket</h3>
+    <input type="text" id="subject" placeholder="Subject"><br>
+    <textarea id="description" placeholder="Describe issue"></textarea><br>
+    <button id="ticketBtn">Submit Ticket</button>
+  </div>
+  <script>
+    const token = localStorage.getItem('token');
+    if(!token){ window.location='/'; }
+    fetch('/api/dashboard', {headers:{Authorization:'Bearer '+token}})
+      .then(r=>r.json()).then(data=>{
+        info.innerText = 'Welcome '+data.username;
+        window.userData = data;
+        links.style.display='block';
+        vmLinks.innerHTML = data.vm1_url+' , '+data.vm2_url;
+        launchCml.onclick=()=>window.open(data.cml_url,'_blank');
+        rebootCml.onclick=()=>reboot('/api/cml/reboot',rebootCml);
+        rebootVm1.onclick=()=>reboot('/api/vm/1/reboot',rebootVm1);
+        rebootVm2.onclick=()=>reboot('/api/vm/2/reboot',rebootVm2);
+      });
+
+    ticketBtn.onclick=async()=>{
+      await fetch('/api/tickets',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({subject:subject.value,description:description.value})});
+      alert('Ticket submitted');
+    }
+
+    function reboot(url,btn){
+      fetch(url,{method:'POST',headers:{Authorization:'Bearer '+token}}).then(r=>r.json()).then(data=>{alert(data.status);btn.disabled=true;setTimeout(()=>btn.disabled=false,60000);});
+    }
+  </script>
+</body>
+</html>

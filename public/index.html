@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+</head>
+<body>
+  <h1>Student Login</h1>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required><br>
+    <input type="password" id="password" placeholder="Password" required><br>
+    <input type="text" id="token" placeholder="2FA Token (if enabled)"><br>
+    <button type="submit">Login</button>
+  </form>
+  <p><a href="reset.html">Forgot password?</a></p>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const res = await fetch('/api/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          email: email.value,
+          password: password.value,
+          token: token.value
+        })
+      });
+      const data = await res.json();
+      if(res.ok){
+        localStorage.setItem('token', data.token);
+        window.location = 'dashboard.html';
+      } else {
+        alert(data.error);
+      }
+    });
+  </script>
+</body>
+</html>
